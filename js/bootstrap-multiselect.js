@@ -30,7 +30,7 @@
 
         this.options = this.mergeOptions(options);
         this.$select = $(select);
-        
+        // this.options.selectId = this.$select.attr("id");
         // Initialization.
         // We have to clone to create a new reference.
         this.originalOptions = this.$select.clone()[0].options;
@@ -43,6 +43,7 @@
         // Build select all if enabled.
         this.buildContainer();
         this.buildButton();
+        this.buildAjax();
         this.buildSelectAll();
         this.buildDropdown();
         this.buildDropdownOptions();
@@ -109,10 +110,12 @@
             enableFiltering: false,
             enableCaseInsensitiveFiltering: false,
             filterPlaceholder: 'Search',
+            enableAjax: false,
+            ajaxModel: 'cliente',
             // possible options: 'text', 'value', 'both'
             filterBehavior: 'text',
             preventInputChangeEvent: false,
-            nonSelectedText: 'None selected',
+            nonSelectedText: 'Todos',
             nSelectedText: 'selected'
         },
         
@@ -131,6 +134,24 @@
             this.$container = $(this.options.buttonContainer);
         },
         
+        buildAjax: function() {
+            if (this.options.enableAjax) {
+                var lselect = this.$select;
+                $.ajax({
+                    url:'/backend.php/reportes/retrieveModel',
+                    type:'POST',
+                    async: false,
+                    data: 'c='+this.options.ajaxModel,
+                    dataType: 'json',
+                    success: function( json ) {
+                        $.each(json.options, function(i, value) {
+                            lselect.append($('<option>').text(value.nombre).attr('value', value.id));
+                        });
+                    }
+            
+            });}
+        },
+
         buildButton: function() {
             // Build button.
             this.$button = $(this.templates.button).addClass(this.options.buttonClass);
